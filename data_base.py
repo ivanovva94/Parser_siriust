@@ -67,7 +67,6 @@ def add_user_data(user_data):
         remove_user_wishlist(user_data)
 
 
-
 def add_wishlist(mail, wishlist_data):
     session = Session()
     user = session.query(User).filter(User.mail == mail).first()
@@ -82,8 +81,8 @@ def add_wishlist(mail, wishlist_data):
 
 def display_data():
     session = Session()
-
     users = session.query(User).all()
+
     for user in users:
         print(f"User ID: {user.id}")
         print(f"Имя: {user.first_name}")

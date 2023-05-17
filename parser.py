@@ -22,6 +22,7 @@ class Parser:
         self.password = password
         self.session = requests.Session()
 
+    # Функция для авторизации пользователя на сайте
     def login(self):
         payload = {
             "return_url": "index.php",
@@ -41,6 +42,7 @@ class Parser:
         else:
             raise Exception("Ошибка авторизации")
 
+    # Функция для получения контента html страницы
     def get_html_tree(self, url):
         if not self.already_login:
             self.login()
@@ -52,6 +54,7 @@ class Parser:
             print(f"Не удалось получить контент с {url}")
             print(e)
 
+    # Функция забирает рейтинг товара
     @staticmethod
     def get_item_rating(html_tree):
         star = len(html_tree.xpath(WishlistLocators.STAR))
@@ -62,6 +65,7 @@ class Parser:
             return star
         return star
 
+    # Функция считает количество магазинов, где есть товар
     @staticmethod
     def count_of_available_shops(html_tree):
         count = 0
@@ -72,6 +76,7 @@ class Parser:
                 count += 1
         return count
 
+    # Функция преобразует список отзывов в строку
     @staticmethod
     def get_reviews_from_list(reviews_list):
         reviews_text = ""
@@ -80,12 +85,14 @@ class Parser:
             reviews_text += reviews
         return reviews_text
 
+    # Функция забирает стоимость товара
     @staticmethod
     def get_price(html_tree):
         price_list = html_tree.xpath(WishlistLocators.PRICE)[0:2]
         convert_price = list(map(lambda x: float(x.replace("\xa0", "")), price_list))
         return convert_price
 
+    # Функция забирает список отзывов с пагинацией по страницам
     def get_reviews_pagination(self, html_tree, reviews_list=None):
         if reviews_list is None:
             reviews_list = []
@@ -100,6 +107,7 @@ class Parser:
             self.get_reviews_pagination(reviews_next_html, reviews_list=reviews_list)
         return reviews_list
 
+    # Функция забирает данные пользователя, и сохраняет в БД
     def parse_user_data(self):
         user_data = {}
 
@@ -111,6 +119,7 @@ class Parser:
 
         add_user_data(user_data)
 
+    # Функция забирает данные "Избранных" товаров, и сохраняет в БД
     def parse_wishlist_data(self):
         wishlist_html = self.get_html_tree(URLS["wishlist_url"])
         items_hrefs = wishlist_html.xpath(WishlistLocators.ITEM_HREF)
@@ -161,9 +170,9 @@ class Parser:
 
 
 if __name__ == "__main__":
-    mail = input("Enter your mail: ")
-    password = input("Enter your password: ")
-    parse = Parser(mail, password)
-    parse.parse_user_data()
-    parse.parse_wishlist_data()
-    display_data()
+    mail = input("Enter your mail: ")   # Спрашивает у пользователя логин
+    password = input("Enter your password: ")   # Спрашивает у пользователя пароль
+    parse = Parser(mail, password)  # Создает объект класса Parser
+    parse.parse_user_data()    # Вызов функции парсинга данных пользователя
+    parse.parse_wishlist_data()    # Вызов функции парсинга Избранных товаров
+    display_data()    # Вывод в консоль данных из БД
